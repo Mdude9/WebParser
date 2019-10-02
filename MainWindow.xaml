@@ -1,0 +1,66 @@
+﻿<Window x:Class="WebParserTestApp2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WebParserTestApp2"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="715" Width="1025">
+    <Grid Height="696" Margin="0,0,3,0">
+        <Grid.ColumnDefinitions>
+        </Grid.ColumnDefinitions>
+        <TextBox Name="SearchBar" HorizontalAlignment="Left" Height="24" Margin="10,15,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="564"/>
+        <Button Content="Найти" Name="SearchButton" HorizontalAlignment="Left" Margin="594,15,0,0" VerticalAlignment="Top"  
+                Click="SearchButton_Click" Width="80" Height="24"/>
+        <Button Content="Очистить таблицы" HorizontalAlignment="Left" Margin="700,15,0,0" VerticalAlignment="Top" Width="120" Height="24" Click="ClearButton_Click"/>
+
+        <DataGrid Name="AppStoreGrid" AutoGenerateColumns="False"
+                  Margin="10,70,10,350" ItemsSource="{Binding googleApps, IsAsync=true}">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Icon" Width="50">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding Path=IconLink, IsAsync=True}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Title" Binding="{Binding Path=Name, IsAsync=True}" Width="100"/>
+                <DataGridTextColumn Header="Rating" Binding="{Binding Path=Rating, IsAsync=True}" Width="50" />
+                <DataGridTemplateColumn Header="Links to screenshots" IsReadOnly="false">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <ItemContainerTemplate>
+                            <ListView ItemsSource="{Binding Path=Screenshots, IsAsync=True}"/>
+                        </ItemContainerTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <DataGrid Name="GooglePlayGrid" AutoGenerateColumns="False"
+                  Margin="10,380,10,10" ItemsSource="{Binding googleApps, IsAsync=true}">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Icon" Width="50">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding Path=IconLink, IsAsync=True}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Title" Binding="{Binding Path=Name, IsAsync=True}" Width="100"/>
+                <DataGridTextColumn Header="Rating" Binding="{Binding Path=Rating, IsAsync=True}" Width="50"/>
+                <DataGridTemplateColumn IsReadOnly="False" Header="Links to screenshots">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <ItemContainerTemplate>
+                            <ListView ItemsSource="{Binding Path=Screenshots, IsAsync=True}"/>
+                        </ItemContainerTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <TextBlock HorizontalAlignment="Left" Margin="10,350,0,0" FontSize="20" Text="GOOGLE PLAY" TextWrapping="Wrap" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="10,40,0,0" FontSize="20" Text="APP STORE" TextWrapping="Wrap" VerticalAlignment="Top"/>
+
+
+
+    </Grid>
+</Window>
