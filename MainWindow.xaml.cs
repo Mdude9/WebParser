@@ -16,11 +16,17 @@ namespace WebParserTestApp2
         GoogleParser<List<AppInfo>> googleParser;
         AppStoreParser<List<AppInfo>> appStoreParser;
         DbManager dbManager;
-        
+        Window waitWindow;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            waitWindow = new Window();
+            //waitWindow.Name = "Wait for it...";
+            waitWindow.FontSize = 30;
+            waitWindow.Title = "Wait for it...";
+            waitWindow.Content = "Окно закроется автоматически после получения данных парсинга...\n Пока так -_-";
 
             dbManager = new DbManager();
 
@@ -40,28 +46,34 @@ namespace WebParserTestApp2
             GooglePlayGrid.Items.Clear();
             AppStoreGrid.Items.Clear();
 
+
             string searchStr = SearchBar.Text;
 
             Task<bool> dbTask = Task.Run(() => dbManager.SearchDbRecord(searchStr));
             await Task.WhenAll(dbTask);
 
-            if (dbTask.Result == false) 
+            if (dbTask.Result == false) // Такго запроса нет в базе
             {
-                Task<List<AppInfo>> gTask = googleParser.GetGoogleData(searchStr);
-                Task<List<AppInfo>> aTask = appStoreParser.GetAppStoreData(searchStr);
+                waitWindow.Show();
 
-                await Task.WhenAll(gTask, aTask);
+                Task<List<AppInfo>> googleTask = googleParser.GetGoogleData(searchStr);
+                Task<List<AppInfo>> appleTask = appStoreParser.GetAppStoreData(searchStr);
+
+                await Task.WhenAll(googleTask, appleTask);
 
                 // save received data to db
-                await dbManager.UpdateDb(searchStr, gTask.Result, aTask.Result);
+                await dbManager.UpdateDb(searchStr, appleTask.Result, googleTask.Result);
 
-                foreach (AppInfo app in gTask.Result)
+                foreach (AppInfo app in googleTask.Result)
                     GooglePlayGrid.Items.Add(app);
 
-                foreach (AppInfo app in aTask.Result)
+                foreach (AppInfo app in appleTask.Result)
                     AppStoreGrid.Items.Add(app);
+
+                waitWindow.Hide();
+
             }
-            else
+            else // Инфа по запросу уже есть в базе - берем данные из нее
             {
                 Task<List<AppInfo>> googleDbTask = dbManager.GetGoogleDbData(searchStr);
                 Task<List<AppInfo>> appStoreDbTask = dbManager.GetAppStoreDbData(searchStr);

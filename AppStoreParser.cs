@@ -43,7 +43,8 @@ namespace WebParserTestApp2
                 .Where(
                     x => (x.Name == "div" &&
                           x.Attributes["class"] != null &&
-                          x.Attributes["class"].Value.Contains("appmain")))
+                          x.Attributes["class"].Value.Contains("appmain")) /*&&*/
+                          /*x.GetAttributeValue("price",null) == "0"*/)
                 .Take(3)
                 .ToList();
 
@@ -77,76 +78,85 @@ namespace WebParserTestApp2
             // Получаем ссылку на приложение в официальном AppStore
             app.Link = node.Descendants("a").ToList()[0].GetAttributeValue("href", null);
 
-            using (HttpClient auxClient = new HttpClient())
+            if (app.Link.Contains("https://apps.apple.com/"))
             {
-                string appStoreSource = "";
-                try
+                using (HttpClient auxClient = new HttpClient())
                 {
-                    var appStoreResponse = await auxClient.GetByteArrayAsync(app.Link);
-                    appStoreSource = Encoding.GetEncoding("utf-8").GetString(appStoreResponse, 0,
-                                                                                    appStoreResponse.Length - 1);
-                }
-                catch
-                {
-                    System.Windows.MessageBox.Show($"плохая ссылка {app.Link} на приложение в AppStore");
-                }
-                finally
-                {
+                    string appStoreSource = "";
+                    try
+                    {
+                        var appStoreResponse = await auxClient.GetByteArrayAsync(app.Link);
+                        appStoreSource = Encoding.GetEncoding("utf-8").GetString(appStoreResponse, 0,
+                                                                                        appStoreResponse.Length - 1);
+                    }
+                    catch
+                    {
+                        System.Windows.MessageBox.Show($"плохая ссылка {app.Link} на приложение в AppStore");
+                    }
 
-                }
+                    appStoreSource = WebUtility.HtmlDecode(appStoreSource);
+                    HtmlDocument appStoreDoc = new HtmlDocument();
+                    appStoreDoc.LoadHtml(appStoreSource);
 
-                appStoreSource = WebUtility.HtmlDecode(appStoreSource);
-                HtmlDocument appStoreDoc = new HtmlDocument();
-                appStoreDoc.LoadHtml(appStoreSource);
-
-                // Получаем ноду иконки и саму иконку
-                HtmlNode iconNode = appStoreDoc.DocumentNode.Descendants()
-                    .Where(
-                        x => (x.Name == "div" &&
-                              x.Attributes["class"] != null &&
-                              x.Attributes["class"].Value.Contains("product-hero__media l-column small-5 medium-4 " +
-                                                                    "large-3 small-valign-top")))
-                    .FirstOrDefault();
-                app.IconLink = node.Descendants("img").ToList()[0].GetAttributeValue("src", null);
-
-                // Получаем название
-                app.Name = appStoreDoc.DocumentNode.Descendants()
-                    .Where(
-                        x => (x.Name == "h1" &&
-                              x.Attributes["class"] != null &&
-                              x.Attributes["class"].Value.Contains("product-header__title app-header__title")))
-                    .FirstOrDefault().InnerText;
-                app.Name = app.Name.Split("\n")[1].Trim();
-
-                try
-                {
-                    // Полуачаем рейтинг
-                    app.Rating = appStoreDoc.DocumentNode.Descendants()
+                    // Получаем ноду иконки и саму иконку
+                    HtmlNode iconNode = appStoreDoc.DocumentNode.Descendants()
                         .Where(
-                            x => (x.Name == "span" &&
+                            x => (x.Name == "div" &&
                                   x.Attributes["class"] != null &&
-                                  x.Attributes["class"].Value.Contains("we-customer-ratings__averages__display")))
+                                  x.Attributes["class"].Value.Contains("product-hero__media l-column small-5 medium-4 " +
+                                                                        "large-3 small-valign-top")))
+                        .FirstOrDefault();
+                    app.IconLink = node.Descendants("img").ToList()[0].GetAttributeValue("src", null);
+
+                    // Получаем название
+                    app.Name = appStoreDoc.DocumentNode.Descendants()
+                        .Where(
+                            x => (x.Name == "h1" &&
+                                  x.Attributes["class"] != null &&
+                                  x.Attributes["class"].Value.Contains("product-header__title app-header__title")))
                         .FirstOrDefault().InnerText;
+                    app.Name = app.Name.Split("\n")[1].Trim();
+
+                    try
+                    {
+                        // Полуачаем рейтинг
+                        app.Rating = appStoreDoc.DocumentNode.Descendants()
+                            .Where(
+                                x => (x.Name == "span" &&
+                                      x.Attributes["class"] != null &&
+                                      x.Attributes["class"].Value.Contains("we-customer-ratings__averages__display")))
+                            .FirstOrDefault().InnerText;
+                    }
+                    catch
+                    {
+                        app.Rating = "Unknown";
+                    }
+
+                    // Получаем ноду со скриншотами
+                    HtmlNode screenshotsNode = appStoreDoc.DocumentNode.Descendants()
+                        .Where(
+                            x => (x.Name == "div" &&
+                                  x.Attributes["class"] != null &&
+                                  x.Attributes["class"].Value.Contains("we-screenshot-viewer ember-view")))
+                        .FirstOrDefault();
+
+                    // Получаем скриншоты
+                    app.Screenshots = GetAppStoreScreenshots(screenshotsNode);
+
+                    return app;
                 }
-                catch
+            }
+            else
+            {
+                return new AppInfo
                 {
-                    app.Rating = "Unknown";
-                }
-
-
-
-                // Получаем ноду со скриншотами
-                HtmlNode screenshotsNode = appStoreDoc.DocumentNode.Descendants()
-                    .Where(
-                        x => (x.Name == "div" &&
-                              x.Attributes["class"] != null &&
-                              x.Attributes["class"].Value.Contains("we-screenshot-viewer ember-view")))
-                    .FirstOrDefault();
-
-                // Получаем скриншоты
-                app.Screenshots = GetAppStoreScreenshots(screenshotsNode);
-
-                return app;
+                    Name = "Не нашлось:(",
+                    Link = "nope",
+                    Rating = "nope",
+                    Screenshots = new List<string> { "nope" },
+                    IconLink = "nope",
+                    SearchQuery = searchStr
+                };
             }
         }
 

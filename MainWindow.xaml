@@ -6,6 +6,9 @@
         xmlns:local="clr-namespace:WebParserTestApp2"
         mc:Ignorable="d"
         Title="MainWindow" Height="715" Width="1025">
+
+    
+
     <Grid Height="696" Margin="0,0,3,0">
         <Grid.ColumnDefinitions>
         </Grid.ColumnDefinitions>
@@ -59,8 +62,5 @@
         </DataGrid>
         <TextBlock HorizontalAlignment="Left" Margin="10,350,0,0" FontSize="20" Text="GOOGLE PLAY" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,40,0,0" FontSize="20" Text="APP STORE" TextWrapping="Wrap" VerticalAlignment="Top"/>
-
-
-
     </Grid>
 </Window>
