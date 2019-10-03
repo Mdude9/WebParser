@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WebParserTestApp2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="715" Width="1025">
+        Title="WebParser" Height="715" Width="1025">
 
     
 

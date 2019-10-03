@@ -18,9 +18,17 @@ namespace WebParserTestApp2
         DbManager dbManager;
         Window waitWindow;
 
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
         public MainWindow()
         {
             InitializeComponent();
+
+            Closing += MainWindow_Closing;
 
             waitWindow = new Window();
             //waitWindow.Name = "Wait for it...";
@@ -35,10 +43,6 @@ namespace WebParserTestApp2
 
             GooglePlayGrid.ClipboardCopyMode = DataGridClipboardCopyMode.ExcludeHeader;
             AppStoreGrid.ClipboardCopyMode = DataGridClipboardCopyMode.ExcludeHeader;
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
