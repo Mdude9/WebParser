@@ -14,11 +14,11 @@ namespace WebParserTestApp2
     {
         private static string appStoreSearchReq = "https://theappstore.org/search.php?search=";
 
-        public ObservableCollection<AppInfo> appStoreApps = new ObservableCollection<AppInfo>();
+        public List<AppInfo> appStoreApps = new List<AppInfo>();
 
         static readonly HttpClient client = new HttpClient();
 
-        public async Task<ObservableCollection<AppInfo>> GetAppStoreData(string searchStr)
+        public async Task<List<AppInfo>> GetAppStoreData(string searchStr)
         {
             appStoreApps.Clear();
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -10,17 +11,19 @@ namespace WebParserTestApp2
     /// </summary>
     public partial class MainWindow : Window
     {
-        GoogleParser<ObservableCollection<AppInfo>> googleParser;
-        AppStoreParser<ObservableCollection<AppInfo>> appStoreParser;
+        GoogleParser<List<AppInfo>> googleParser;
+        AppStoreParser<List<AppInfo>> appStoreParser;
+        DbManager dbManager;
+        
 
         public MainWindow()
         {
             InitializeComponent();
 
+            dbManager = new DbManager();
 
-
-            googleParser = new GoogleParser<ObservableCollection<AppInfo>>();
-            appStoreParser = new AppStoreParser<ObservableCollection<AppInfo>>();
+            googleParser = new GoogleParser<List<AppInfo>>();
+            appStoreParser = new AppStoreParser<List<AppInfo>>();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -34,22 +37,40 @@ namespace WebParserTestApp2
 
             string searchStr = SearchBar.Text;
 
-            //Task databaseSearch = 
+            Task<bool> dbTask = Task.Run(() => dbManager.SearchDbRecord(searchStr));
+            await Task.WhenAll(dbTask);
 
-
-            Task<ObservableCollection<AppInfo>> gTask = googleParser.GetGoogleData(searchStr);
-            Task<ObservableCollection<AppInfo>> aTask = appStoreParser.GetAppStoreData(searchStr);
-
-            await Task.WhenAll(gTask, aTask);
-            foreach (AppInfo app in gTask.Result)
+            if (dbTask.Result == false) 
             {
-                GooglePlayGrid.Items.Add(app);
+                Task<List<AppInfo>> gTask = googleParser.GetGoogleData(searchStr);
+                Task<List<AppInfo>> aTask = appStoreParser.GetAppStoreData(searchStr);
+
+                await Task.WhenAll(gTask, aTask);
+
+                // save received data to db
+                await dbManager.UpdateDb(searchStr, gTask.Result, aTask.Result);
+
+                foreach (AppInfo app in gTask.Result)
+                    GooglePlayGrid.Items.Add(app);
+
+                foreach (AppInfo app in aTask.Result)
+                    AppStoreGrid.Items.Add(app);
+            }
+            else
+            {
+                Task<List<AppInfo>> googleDbTask = dbManager.GetGoogleDbData(searchStr);
+                Task<List<AppInfo>> appStoreDbTask = dbManager.GetAppStoreDbData(searchStr);
+
+                await Task.WhenAll(googleDbTask, appStoreDbTask);
+
+                foreach (AppInfo app in googleDbTask.Result)
+                    GooglePlayGrid.Items.Add(app);
+
+                foreach (AppInfo app in appStoreDbTask.Result)
+                    AppStoreGrid.Items.Add(app);
             }
 
-            foreach (AppInfo app in aTask.Result)
-            {
-                AppStoreGrid.Items.Add(app);
-            }
+
         }
 
         private void ClearButton_Click(object sender, RoutedEventArgs e)

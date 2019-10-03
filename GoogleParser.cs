@@ -13,11 +13,11 @@ namespace WebParserTestApp2
     {
         private static string googleSearchReq = "https://play.google.com/store/search?q=";
 
-        public ObservableCollection<AppInfo> googleApps = new ObservableCollection<AppInfo>();
+        public List<AppInfo> googleApps = new List<AppInfo>();
 
         static readonly HttpClient client = new HttpClient();
 
-        public async Task<ObservableCollection<AppInfo>> GetGoogleData(string searchText)
+        public async Task<List<AppInfo>> GetGoogleData(string searchText)
         {
             googleApps.Clear();
 
