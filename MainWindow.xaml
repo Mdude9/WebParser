@@ -15,7 +15,7 @@
         <Button Content="Очистить таблицы" HorizontalAlignment="Left" Margin="700,15,0,0" VerticalAlignment="Top" Width="120" Height="24" Click="ClearButton_Click"/>
 
         <DataGrid Name="AppStoreGrid" AutoGenerateColumns="False"
-                  Margin="10,70,10,350" ItemsSource="{Binding googleApps, IsAsync=true}">
+                  Margin="10,70,10,350" ClipboardCopyMode="ExcludeHeader">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Icon" Width="50">
                     <DataGridTemplateColumn.CellTemplate>
@@ -29,7 +29,7 @@
                 <DataGridTemplateColumn Header="Links to screenshots" IsReadOnly="false">
                     <DataGridTemplateColumn.CellTemplate>
                         <ItemContainerTemplate>
-                            <ListView ItemsSource="{Binding Path=Screenshots, IsAsync=True}"/>
+                            <ListView Name="AppStoreList" ItemsSource="{Binding Path=Screenshots, IsAsync=True}" KeyUp="List_Keyup"/>
                         </ItemContainerTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -37,7 +37,7 @@
         </DataGrid>
 
         <DataGrid Name="GooglePlayGrid" AutoGenerateColumns="False"
-                  Margin="10,380,10,10" ItemsSource="{Binding googleApps, IsAsync=true}">
+                  Margin="10,380,10,10">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Icon" Width="50">
                     <DataGridTemplateColumn.CellTemplate>
@@ -50,8 +50,8 @@
                 <DataGridTextColumn Header="Rating" Binding="{Binding Path=Rating, IsAsync=True}" Width="50"/>
                 <DataGridTemplateColumn IsReadOnly="False" Header="Links to screenshots">
                     <DataGridTemplateColumn.CellTemplate>
-                        <ItemContainerTemplate>
-                            <ListView ItemsSource="{Binding Path=Screenshots, IsAsync=True}"/>
+                        <ItemContainerTemplate >
+                            <ListView Name="GoogleList" ItemsSource="{Binding Path=Screenshots, IsAsync=True}" KeyUp="List_Keyup"/>
                         </ItemContainerTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

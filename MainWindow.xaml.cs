@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace WebParserTestApp2
@@ -24,6 +26,9 @@ namespace WebParserTestApp2
 
             googleParser = new GoogleParser<List<AppInfo>>();
             appStoreParser = new AppStoreParser<List<AppInfo>>();
+
+            GooglePlayGrid.ClipboardCopyMode = DataGridClipboardCopyMode.ExcludeHeader;
+            AppStoreGrid.ClipboardCopyMode = DataGridClipboardCopyMode.ExcludeHeader;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -79,9 +84,14 @@ namespace WebParserTestApp2
             AppStoreGrid.Items.Clear();
         }
 
-        private void GoogleList_KeyDown(object sender, KeyEventArgs e)
+        private void List_Keyup(object sender, KeyEventArgs e)
         {
-
+            if (e.Key == Key.C)
+            {
+                var item = sender as ListView;
+                Clipboard.SetText(item.SelectedItem.ToString());
+            }
+            
         }
     }
 }
