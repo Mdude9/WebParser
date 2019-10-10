@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -48,21 +49,20 @@ namespace WebParserTestApp2
                 .Take(3)
                 .ToList();
 
-            AppInfo app = new AppInfo();
-            // Парсим каждую ноду с приложением
-            // TODO параллельно парсить три приложения
+            Task[] taskArr = new Task[nodes.Count];
+            int index = 0;
+            // Параллельно парсим каждое приложение из выдачи в AppStore
             foreach (HtmlNode node in nodes)
             {
-                try
-                {
-                    app = await AppStoreWorker(node, searchStr);
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.MessageBox.Show(ex.Message);
-                }
+                taskArr[index++] = AppStoreWorker(node, searchStr);
+            }
 
-                appStoreApps.Add(app);
+            // Дожидаемся завершения задач
+            await Task.WhenAll(taskArr);
+
+            foreach (Task<AppInfo> t in taskArr)
+            {
+                appStoreApps.Add(t.Result);
             }
 
             return appStoreApps;
@@ -87,7 +87,7 @@ namespace WebParserTestApp2
                     {
                         var appStoreResponse = await auxClient.GetByteArrayAsync(app.Link);
                         appStoreSource = Encoding.GetEncoding("utf-8").GetString(appStoreResponse, 0,
-                                                                                        appStoreResponse.Length - 1);
+                                                                                 appStoreResponse.Length - 1);
                     }
                     catch
                     {
@@ -142,13 +142,11 @@ namespace WebParserTestApp2
 
                     // Получаем скриншоты
                     app.Screenshots = GetAppStoreScreenshots(screenshotsNode);
-
-                    return app;
                 }
             }
             else
             {
-                return new AppInfo
+                app =  new AppInfo
                 {
                     Name = "Не нашлось:(",
                     Link = "nope",
@@ -158,6 +156,8 @@ namespace WebParserTestApp2
                     SearchQuery = searchStr
                 };
             }
+
+            return app;
         }
 
         private List<string> GetAppStoreScreenshots(HtmlNode node)

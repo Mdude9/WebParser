@@ -50,7 +50,6 @@ namespace WebParserTestApp2
             GooglePlayGrid.Items.Clear();
             AppStoreGrid.Items.Clear();
 
-
             string searchStr = SearchBar.Text;
 
             Task<bool> dbTask = Task.Run(() => dbManager.SearchDbRecord(searchStr));
