@@ -21,7 +21,7 @@ namespace WebParserTestApp2
         {
             googleApps.Clear();
 
-            string str = googleSearchReq + searchText + "&c=apps";
+            string str = googleSearchReq + searchText;
 
             var response = await client.GetByteArrayAsync(str);
             string source = Encoding.GetEncoding("utf-8").GetString(response, 0, response.Length - 1);
@@ -34,9 +34,8 @@ namespace WebParserTestApp2
                 .Where(
                 x => (x.Name == "div" &&
                       x.Attributes["class"] != null &&
-                      x.Attributes["class"].Value.Contains("FjwTrf mpg5gc")))
+                      x.Attributes["class"].Value.Contains("WHE7ib mpg5gc")))
                 .Take(3).ToList();
-
 
             foreach (HtmlNode node in nodes)
             {
